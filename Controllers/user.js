@@ -2,6 +2,7 @@ const User = require('../models/user');
 const JobsSaved = require('../models/jobsSaved');
 const Job = require('../models/jobs');
 const Applications = require('../models/applications');
+const Message = require('../models/messages');
 const { generateOTP } = require('../utils/EmailSend');
 const { generateToken } = require('../utils/JWT_token');
 const { Op } = require('sequelize');
@@ -148,8 +149,8 @@ exports.getUserById = async (req, res) => {
             min_hour_rate: user.min_hour_rate,
             availability: user.availability,
             profile_status: user.profile_status,
-            trade: user.trade,
-            skill: user.skill,
+            trade: JSON.parse(user.trade),
+            skill: JSON.parse(user.skill),
             is_active: user.is_active,
             user_since: timeSince(user.created_at),
         };
@@ -297,6 +298,17 @@ exports.deleteUser = async (req, res) => {
         }
 
         await Job.destroy({ where: { user_id: userId } });
+
+        await Applications.destroy({ where: { user_id: userId } });
+
+        await Message.destroy({
+            where: {
+                [Op.or]: [
+                    { sender_id: userId },
+                    { receiver_id: userId }
+                ]
+            }
+        });
 
         res.status(200).json({
             success: true,
