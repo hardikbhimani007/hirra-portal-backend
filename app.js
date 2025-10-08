@@ -1,7 +1,7 @@
 const express = require('express');
 require('dotenv').config();
-const cors = require('cors'); 
-const path = require('path'); 
+const cors = require('cors');
+const path = require('path');
 const http = require("http");
 const { initSocket } = require("./socket");
 
@@ -10,14 +10,24 @@ const server = http.createServer(app);
 
 const io = initSocket(server);
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(cors({
+    origin: '*',
+    credentials: true
+}));
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+    setHeaders: (res, filePath) => {
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        res.set('Access-Control-Allow-Headers', 'Content-Type');
+        res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.set('Cross-Origin-Embedder-Policy', 'unsafe-none');
+    }
+}));
 app.use(express.json({ limit: '150mb' }));
 app.use(express.urlencoded({ limit: '150mb', extended: true }));
 
 app.use(express.json());
-
-app.use(cors());    
 
 //routes
 const userRoutes = require('./Routes/user');
