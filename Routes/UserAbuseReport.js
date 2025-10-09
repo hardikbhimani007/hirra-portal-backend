@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const UserAbuseReportController = require('../controllers/UserAbuseReport');
+const UserAbuseReportController = require('../Controllers/UserAbuseReport');
 const { verifyToken } = require('../utils/JWT_token');
 
 router.post('/insert', verifyToken, UserAbuseReportController.createUserAbuseReport);

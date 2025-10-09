@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const jobAbuseReportsController = require('../controllers/jobAbuseReports');
+const jobAbuseReportsController = require('../Controllers/jobAbuseReports');
 const { verifyToken } = require('../utils/JWT_token');
 
 router.post('/insert', verifyToken, jobAbuseReportsController.createJobAbuseReport);

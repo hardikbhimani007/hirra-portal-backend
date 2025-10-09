@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const appController = require('../controllers/applications');
+const appController = require('../Controllers/applications');
 const { verifyToken } = require('../utils/JWT_token');
 
 router.post('/insert', verifyToken, appController.createApplication);

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const CategoriesController = require('../controllers/categories');
+const CategoriesController = require('../Controllers/categories');
 const { verifyToken } = require('../utils/JWT_token');
 
 router.post('/Insert', verifyToken, CategoriesController.createCategory);

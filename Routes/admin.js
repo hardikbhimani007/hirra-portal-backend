@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const AdminController = require('../controllers/admin');
+const AdminController = require('../Controllers/admin');
 const { verifyToken } = require('../utils/JWT_token');
 const { truncateMessages } = require('../Controllers/messageController');
 

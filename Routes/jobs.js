@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const jobController = require('../controllers/jobs');
+const jobController = require('../Controllers/jobs');
 const { verifyToken, checkRole } = require('../utils/JWT_token');
 
 router.post('/insert', verifyToken, checkRole('subcontractor'), jobController.createJob);
