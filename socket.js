@@ -242,11 +242,13 @@ async function getSubChatMessages(user_id, receiver_id, max_id = 0) {
         const messages = await Message.findAll({
             where: whereClause,
             order: [["id", "DESC"]],
-            limit: 15,
+            limit: 16,
             raw: true
         });
 
-        return messages.reverse().map(msg => {
+        const has_more = messages.length > 15;
+
+        const messagesToReturn = messages.slice(0, 15).reverse().map(msg => {
             const date = new Date(msg.created_at);
             const today = new Date();
             const yesterday = new Date();
@@ -277,9 +279,12 @@ async function getSubChatMessages(user_id, receiver_id, max_id = 0) {
                 date_time: msg.created_at
             };
         });
+
+        return { messages: messagesToReturn, has_more };
+
     } catch (err) {
         console.error("Error fetching sub chat messages:", err);
-        return [];
+        return { messages: [], has_more: false };
     }
 }
 
