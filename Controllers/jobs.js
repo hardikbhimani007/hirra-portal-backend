@@ -4,7 +4,6 @@ const Applications = require('../models/applications');
 const JobAbuseReport = require('../models/jobAbuseReports');
 const { Op } = require('sequelize');
 const { isJobSavedByUser, timeSince } = require('../utils/common');
-const Service_url = process.env.SERVICE_URL || '';
 
 exports.createJob = async (req, res) => {
   try {
@@ -156,6 +155,16 @@ exports.getDashboardJobs = async (req, res) => {
 
         const jobUser = await User.findByPk(job.user_id, { attributes: ['user_type', 'name'] });
         const application = await Applications.findOne({ where: { user_id, job_id: job.id } });
+        const report = await JobAbuseReport.findOne({
+          where: {
+            job_id: job.id,
+            report_by: user_id
+          }
+        });
+        const reportInfo = {
+          reported: !!report,
+          report_reason: report ? report.report_reason : null
+        };
 
         return {
           ...job.toJSON(),
@@ -164,6 +173,7 @@ exports.getDashboardJobs = async (req, res) => {
           user_type: jobUser ? jobUser.user_type : null,
           name: jobUser ? jobUser.name : null,
           is_applied: !!application,
+          abuse_report: reportInfo
         };
       })
     );

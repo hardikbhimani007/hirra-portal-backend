@@ -1,6 +1,6 @@
 const Message = require('../models/messages');
 
-const truncateMessages = async (req, res) => {
+exports.truncateMessages = async (req, res) => {
   try {
     await Message.destroy({
       where: {},      
@@ -19,8 +19,4 @@ const truncateMessages = async (req, res) => {
       error: error.message,
     });
   }
-};
-
-module.exports = {
-  truncateMessages,
 };

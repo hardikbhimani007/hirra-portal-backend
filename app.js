@@ -38,6 +38,7 @@ const jobAbuseReports = require('./Routes/jobAbuseReports');
 const UserAbuseReport = require('./Routes/UserAbuseReport');
 const adminReport = require('./Routes/admin');
 const Categories = require('./Routes/categories');
+const messagesRoutes = require('./Routes/messages');
 
 app.use("/api/users", userRoutes)
 app.use("/api/jobs", Jobs)
@@ -47,6 +48,7 @@ app.use("/api/jobs/abusereport", jobAbuseReports)
 app.use("/api/users/abusereport", UserAbuseReport)
 app.use("/api/admin", adminReport)
 app.use("/api/admin/categories", Categories)
+app.use("/api/messages", messagesRoutes)
 //
 
 const PORT = process.env.PORT || 5001;

@@ -58,4 +58,22 @@ function checkRole(requiredRole) {
     };
 }
 
-module.exports = { generateToken, verifyToken, verifyTokenSync, checkRole };
+function getUserIdFromToken(token) {
+    if (!token) {
+        throw new Error('Token is required');
+    }
+
+    const actualToken = token.startsWith('Bearer ') ? token.split(' ')[1] : token;
+
+    try {
+        const decoded = jwt.verify(actualToken, JWT_SECRET);
+        if (!decoded.id) {
+            throw new Error('Token does not contain user ID');
+        }
+        return decoded.id;
+    } catch (err) {
+        throw new Error('Invalid token');
+    }
+}
+
+module.exports = { generateToken, verifyToken, verifyTokenSync, checkRole, getUserIdFromToken };

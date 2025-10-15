@@ -7,6 +7,6 @@ const { truncateMessages } = require('../Controllers/messageController');
 router.get('/jobs', verifyToken, AdminController.getJobs);
 router.get('/tradespersons', verifyToken, AdminController.getTradesperson);
 router.get('/subcontractors', verifyToken, AdminController.getSubcontractors);
-router.delete('/delete', truncateMessages);
+router.delete('/truncate', truncateMessages);
 
 module.exports = router;

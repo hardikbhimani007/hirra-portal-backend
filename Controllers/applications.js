@@ -387,14 +387,20 @@ exports.updateApplication = async (req, res) => {
 
 exports.deleteApplication = async (req, res) => {
     try {
-        const { id } = req.params;
-        if (!id) return res.status(400).json({ success: false, message: 'Application ID is required' });
+        const { user_id, job_id } = req.body;
+        if (!user_id || !job_id) {
+            return res.status(400).json({ success: false, message: 'user_id and job_id are required' });
+        }
 
-        const deleted = await Application.destroy({ where: { id } });
-        if (!deleted) return res.status(200).json({ success: false, message: 'Application not found' });
+        const deleted = await Application.destroy({ where: { user_id, job_id } });
+
+        if (!deleted) {
+            return res.status(404).json({ success: false, message: 'Application not found' });
+        }
 
         return res.json({ success: true, message: 'Application deleted successfully' });
     } catch (err) {
         return res.status(500).json({ success: false, error: err.message });
     }
 };
+

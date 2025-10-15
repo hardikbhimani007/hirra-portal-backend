@@ -3,8 +3,9 @@ const JobsSaved = require('../models/jobsSaved');
 const Job = require('../models/jobs');
 const Applications = require('../models/applications');
 const Message = require('../models/messages');
+const UserAbuseReport = require('../models/UserAbuseReport');
 const { generateOTP } = require('../utils/EmailSend');
-const { generateToken } = require('../utils/JWT_token');
+const { generateToken, getUserIdFromToken } = require('../utils/JWT_token');
 const { Op } = require('sequelize');
 const { timeSince } = require('../utils/common');
 const { saveChatMedia } = require('../utils/multerConfig');
@@ -113,6 +114,8 @@ exports.getUserById = async (req, res) => {
                 message: 'User not found',
             });
         }
+        const token = req.headers.authorization;
+        const reporterId = getUserIdFromToken(token);
 
         const savedJobsCount = await JobsSaved.count({
             where: { user_id: user.id }
@@ -121,6 +124,17 @@ exports.getUserById = async (req, res) => {
         const appliedJobsCount = await Applications.count({
             where: { user_id: user.id }
         });
+
+        const report = await UserAbuseReport.findOne({
+            where: {
+                user_id: user.id,
+                report_by: reporterId
+            }
+        });
+        const reportInfo = {
+            reported: !!report,
+            report_reason: report ? report.report_reason : null
+        };
 
         const formattedUser = {
             id: user.id,
@@ -131,7 +145,6 @@ exports.getUserById = async (req, res) => {
                 : null,
             email: user.email,
             phone: user.phone,
-            // jwt_token: user.jwt_token,
             saved_jobs_count: savedJobsCount,
             applied_jobs_count: appliedJobsCount,
             title: user.title,
@@ -141,7 +154,7 @@ exports.getUserById = async (req, res) => {
                 : user.is_cscsfile_verified === 1
                     ? "Verified"
                     : "Not Verified",
-            cscs_file: user.cscs_file,
+            cscs_file: `${Service_url}${user.cscs_file}`,
             location: user.location,
             radius: user.radius != null ? user.radius : "",
             lat: user.lat,
@@ -153,6 +166,7 @@ exports.getUserById = async (req, res) => {
             skill: JSON.parse(user.skill),
             is_active: user.is_active,
             user_since: timeSince(user.created_at),
+            abuse_report: reportInfo
         };
 
         res.status(200).json({
