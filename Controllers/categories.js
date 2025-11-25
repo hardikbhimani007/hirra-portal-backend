@@ -77,6 +77,53 @@ const getCategories = async (req, res) => {
     }
 };
 
+const getAllCategories = async (req, res) => {
+    try {
+        const { search } = req.query;
+
+        const whereClause = search
+            ? {
+                [Op.or]: [
+                    Sequelize.where(
+                        Sequelize.fn('LOWER', Sequelize.col('trade')),
+                        'LIKE',
+                        `%${search.toLowerCase()}%`
+                    ),
+                    Sequelize.where(
+                        Sequelize.fn('LOWER', Sequelize.col('skills')),
+                        'LIKE',
+                        `%${search.toLowerCase()}%`
+                    )
+                ]
+            }
+            : {};
+
+        // Fetch all categories, no pagination
+        const categories = await Category.findAll({
+            where: whereClause,
+            attributes: ['trade', 'skills'],
+            order: [['id', 'DESC']]
+        });
+
+        // Convert skills string to array
+        const formattedCategories = categories.map(cat => ({
+            trade: cat.trade,
+            skills: cat.skills
+                ? cat.skills.split(',').map(s => s.trim())
+                : []
+        }));
+
+        return res.status(200).json({
+            success: true,
+            message: 'Categories fetched successfully!',
+            data: formattedCategories
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, error: err.message });
+    }
+};
+
 const updateCategory = async (req, res) => {
     try {
         const { id, trade, skills } = req.body;
@@ -121,6 +168,7 @@ const deleteCategory = async (req, res) => {
 module.exports = {
     createCategory,
     getCategories,
+    getAllCategories,
     updateCategory,
     deleteCategory,
 };

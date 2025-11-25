@@ -133,7 +133,10 @@ exports.getDashboardJobs = async (req, res) => {
     const currentPage = parseInt(page, 10) || 1;
     const offset = (currentPage - 1) * limit;
 
-    let whereClause = { user_id: { [Op.ne]: user_id } };
+    let whereClause = {
+      user_id: { [Op.ne]: user_id },
+      status: true,
+    };
 
     if (search && search.trim() !== "") {
       whereClause[Op.or] = [
@@ -142,10 +145,34 @@ exports.getDashboardJobs = async (req, res) => {
       ];
     }
 
+    // 🧠 Fetch user's trade info
+    const user = await User.findByPk(user_id, { attributes: ['trade'] });
+
+    // Handle both array or JSON string format
+    let userTrades = [];
+    if (user?.trade) {
+      if (Array.isArray(user.trade)) {
+        userTrades = user.trade.map(t => t.toLowerCase().trim());
+      } else {
+        try {
+          const parsed = JSON.parse(user.trade);
+          if (Array.isArray(parsed)) {
+            userTrades = parsed.map(t => t.toLowerCase().trim());
+          }
+        } catch {
+          // ignore parse errors
+        }
+      }
+    }
+
     const allJobs = await Job.findAll({
       where: whereClause,
       order: [['created_at', 'DESC']],
     });
+
+    // 🔥 Normalization function
+    const normalize = (str) =>
+      str?.toLowerCase().trim().replace(/\s+/g, ' '); // normalize spaces + lowercase
 
     const jobsWithExtras = await Promise.all(
       allJobs.map(async (job) => {
@@ -156,15 +183,15 @@ exports.getDashboardJobs = async (req, res) => {
         const jobUser = await User.findByPk(job.user_id, { attributes: ['user_type', 'name'] });
         const application = await Applications.findOne({ where: { user_id, job_id: job.id } });
         const report = await JobAbuseReport.findOne({
-          where: {
-            job_id: job.id,
-            report_by: user_id
-          }
+          where: { job_id: job.id, report_by: user_id }
         });
-        const reportInfo = {
-          reported: !!report,
-          report_reason: report ? report.report_reason : null
-        };
+
+        const tradeRequired = normalize(job.trade_required || '');
+
+        // ✅ Strict full-sentence match (case-insensitive)
+        const tradeMatch = userTrades.some(
+          (trade) => normalize(trade) === tradeRequired
+        );
 
         return {
           ...job.toJSON(),
@@ -173,12 +200,23 @@ exports.getDashboardJobs = async (req, res) => {
           user_type: jobUser ? jobUser.user_type : null,
           name: jobUser ? jobUser.name : null,
           is_applied: !!application,
-          abuse_report: reportInfo
+          abuse_report: {
+            reported: !!report,
+            report_reason: report ? report.report_reason : null
+          },
+          trade_match: tradeMatch,
         };
       })
     );
 
     const filteredJobs = jobsWithExtras.filter(Boolean);
+
+    // 🔀 Sort: exact trade matches first
+    filteredJobs.sort((a, b) => {
+      if (a.trade_match && !b.trade_match) return -1;
+      if (!a.trade_match && b.trade_match) return 1;
+      return 0;
+    });
 
     const paginatedJobs = filteredJobs.slice(offset, offset + limit);
 

@@ -246,6 +246,8 @@ async function getSubChatMessages(user_id, receiver_id, max_id = 0) {
             raw: true
         });
 
+        const has_more = messages.length > 15;
+
         const messagesToReturn = messages.slice(0, 15).reverse().map(msg => {
             const date = new Date(msg.created_at);
             const today = new Date();
@@ -282,7 +284,7 @@ async function getSubChatMessages(user_id, receiver_id, max_id = 0) {
 
     } catch (err) {
         console.error("Error fetching sub chat messages:", err);
-        return err;
+        return { messages: [], has_more: false };
     }
 }
 

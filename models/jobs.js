@@ -1,4 +1,3 @@
-// models/Job.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
 
@@ -52,8 +51,28 @@ const Job = sequelize.define('Job', {
     type: DataTypes.DATEONLY,
     allowNull: true,
   },
+  finish_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+  },
   duration: {
     type: DataTypes.STRING(100),
+    allowNull: true,
+  },
+  project_type: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+  },
+  radius: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+  },
+  radius_unit: {
+    type: DataTypes.STRING(10),
+    allowNull: true,
+  },
+  trade_required: {
+    type: DataTypes.STRING(255),
     allowNull: true,
   },
   skills: {
@@ -63,7 +82,7 @@ const Job = sequelize.define('Job', {
   },
   status: {
     type: DataTypes.BOOLEAN,
-    defaultValue: true,
+    defaultValue: false,
   },
 }, {
   tableName: 'jobs',
@@ -71,35 +90,5 @@ const Job = sequelize.define('Job', {
   createdAt: 'created_at',
   updatedAt: 'updated_at',
 });
-
-// 🔥 Auto-add missing columns when model is loaded
-(async () => {
-  try {
-    const queryInterface = sequelize.getQueryInterface();
-    const tableDesc = await queryInterface.describeTable('jobs');
-
-    if (!tableDesc.company_email) {
-      await queryInterface.addColumn('jobs', 'company_email', {
-        type: DataTypes.STRING(50),
-        allowNull: true,
-      });
-      console.log('Added company_email column!');
-    }
-
-    if (!tableDesc.company_phone) {
-      await queryInterface.addColumn('jobs', 'company_phone', {
-        type: DataTypes.STRING(15),
-        allowNull: true,
-      });
-      console.log('Added company_phone column!');
-    }
-
-    // Optional: sync the rest of the table
-    await sequelize.sync({ alter: true });
-    console.log('Job table synced!');
-  } catch (err) {
-    console.error('Error updating Job table:', err);
-  }
-})();
 
 module.exports = Job;

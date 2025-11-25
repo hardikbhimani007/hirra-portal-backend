@@ -166,7 +166,26 @@ exports.getUserById = async (req, res) => {
             skill: JSON.parse(user.skill),
             is_active: user.is_active,
             user_since: timeSince(user.created_at),
-            abuse_report: reportInfo
+            abuse_report: reportInfo,
+            year_of_experience: user.year_of_experience,
+            // hours_of_availability: user.hours_of_availability,
+            // daily_rate: user.daily_rate,
+            company_number: user.company_number,
+            address_house_number: user.address_house_number,
+            address_street: user.address_street,
+            address_city: user.address_city,
+            address_state: user.address_state,
+            address_postal_code: user.address_postal_code,
+            address_country: user.address_country,
+            apartment: user.apartment,
+            business_number: user.business_number,
+            work_location: user.work_location,
+            work_address_postal_code: user.work_address_postal_code,
+            work_address_city: user.work_address_city,
+            work_address_house_number: user.work_address_house_number,
+            work_apartment: user.work_apartment,
+            work_address_country: user.work_address_country,
+            use_same_address: user.use_same_address,
         };
 
         res.status(200).json({
@@ -192,7 +211,7 @@ exports.createUser = async (req, res) => {
                 message: 'User not found',
             });
         }
-
+        if (rest.email) delete rest.email;
         if (profile_pictures && !profile_pictures.startsWith('http')) {
             user.profile_pictures = profile_pictures;
         }
@@ -247,7 +266,7 @@ exports.updateUser = async (req, res) => {
                 message: 'User not found',
             });
         }
-
+        if (rest.email) delete rest.email;
         if (profile_pictures && !profile_pictures.startsWith('http')) {
             user.profile_pictures = profile_pictures;
         }
@@ -362,6 +381,13 @@ exports.loginUser = async (req, res) => {
             return res.status(401).json({
                 success: false,
                 message: 'User not found',
+            });
+        }
+
+        if (!user.is_active) {
+            return res.status(403).json({
+                success: false,
+                message: 'User account is suspended. Please contact support.',
             });
         }
 

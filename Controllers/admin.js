@@ -274,11 +274,13 @@ const getTradesperson = async (req, res) => {
     }
 
     const queryOptions = {
-      attributes: [
-        "id", "name", "email", "phone", "profile_pictures",
-        "cscs_file", "is_cscsfile_verified", "location", "lat", "long",
-        "is_active", "created_at", "updated_at"
-      ],
+      attributes: ["id","name","email", "user_type", "profile_status", "phone","profile_pictures","title",
+"description","location","lat","long","radius","min_hour_rate","availability",
+"trade","year_of_experience","company_number","business_number","address_house_number",
+"address_city","address_postal_code","address_country","apartment","cscs_file","is_cscsfile_verified",
+ "work_location", "work_address_postal_code","work_address_city","work_address_house_number",
+ "work_apartment", "work_address_country", "use_same_address",
+"is_active","created_at","updated_at"],
       where: whereCondition,
       order: [["id", "DESC"]],
       raw: true,
@@ -385,10 +387,14 @@ const getSubcontractors = async (req, res) => {
     }
 
     const queryOptions = {
-      attributes: [
-        "id", "name", "email", "phone", "profile_pictures",
-        "location", "lat", "long", "is_active", "created_at", "updated_at"
-      ],
+      attributes: ["id","name","email", "user_type","phone","profile_pictures","title",
+"description","location","lat","long","radius",
+"min_hour_rate","availability","trade","year_of_experience",
+"company_number","business_number","address_house_number","address_city","address_postal_code",
+"address_country","apartment","cscs_file","is_cscsfile_verified",
+ "work_location", "work_address_postal_code","work_address_city","work_address_house_number",
+ "work_apartment", "work_address_country", "use_same_address",
+"is_active","created_at","updated_at"],
       where: whereCondition,
       order: [["id", "DESC"]],
       raw: true,

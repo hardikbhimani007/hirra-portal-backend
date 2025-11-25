@@ -72,7 +72,7 @@ exports.getApplicationById = async (req, res) => {
         const job = await Job.findByPk(app.job_id, {
             attributes: [
                 'user_id', 'title', 'description', 'location',
-                'lat', 'long', 'hourly_rate', 'is_greeen_project',
+                'lat', 'long', 'hourly_rate', 'is_green_project',
                 'start_date', 'duration', 'skills'
             ]
         });
@@ -134,10 +134,11 @@ exports.getApplicationsByUserId = async (req, res) => {
             include: [
                 {
                     model: Job,
+                    where: { status: true },
                     attributes: [
                         'id', 'user_id', 'title', 'description', 'location',
-                        'lat', 'long', 'hourly_rate', 'is_greeen_project',
-                        'start_date', 'duration', 'skills'
+                        'lat', 'long', 'hourly_rate', 'is_green_project',
+                        'start_date', 'duration', 'skills', 'company_email', 'company_phone'
                     ],
                     include: [
                         {
@@ -164,6 +165,7 @@ exports.getApplicationsByUserId = async (req, res) => {
         const applicationsWithDetails = await Promise.all(
             apps.map(async (app) => {
                 const abuseReportsRaw = await JobAbuseReport.findAll({ where: { job_id: app.job_id } });
+                const userReport = abuseReportsRaw.find(r => r.report_by == user_id);
 
                 const abuseReports = await Promise.all(
                     abuseReportsRaw.map(async (report) => {
@@ -192,7 +194,12 @@ exports.getApplicationsByUserId = async (req, res) => {
                     ...app.Job?.toJSON(),
                     job_poster_name: app.Job?.Poster?.name,
                     job_abuse_count: abuseReports.length,
-                    abuse_reports: abuseReports
+                    abuse_reports: abuseReports,
+                    abuse_report: {
+                        reported: !!userReport,
+                        report_reason: userReport ? userReport.report_reason : null,
+                        reported_since: userReport ? timeSince(userReport.created_at) : null
+                    }
                 };
             })
         );
@@ -267,7 +274,7 @@ exports.getApplications = async (req, res) => {
             where: { id: jobIds },
             attributes: [
                 'id', 'user_id', 'title', 'location',
-                'lat', 'long', 'hourly_rate', 'is_greeen_project',
+                'lat', 'long', 'hourly_rate', 'is_green_project', 'company_email', 'company_phone',
                 'start_date', 'duration', 'skills'
             ]
         });
@@ -346,7 +353,7 @@ exports.getApplicationsExcludingUserId = async (req, res) => {
             const job = await Job.findByPk(app.job_id, {
                 attributes: [
                     'user_id', 'title', 'description', 'location',
-                    'lat', 'long', 'hourly_rate', 'is_greeen_project',
+                    'lat', 'long', 'hourly_rate', 'is_green_project', 'company_email', 'company_phone',
                     'start_date', 'duration', 'skills'
                 ]
             });
